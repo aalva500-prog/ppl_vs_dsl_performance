@@ -1,0 +1,476 @@
+Query_ID,PPL_Query,DSL_Query,PPL_Avg_ms,PPL_Median_ms,PPL_Std_ms,PPL_MAD_ms,PPL_P90_ms,PPL_P95_ms,PPL_P99_ms,PPL_Min_ms,PPL_Max_ms,PPL_Raw_Max_ms,PPL_Outlier_Count,PPL_Success_Rate,DSL_Avg_ms,DSL_Median_ms,DSL_Std_ms,DSL_MAD_ms,DSL_P90_ms,DSL_P95_ms,DSL_P99_ms,DSL_Min_ms,DSL_Max_ms,DSL_Raw_Max_ms,DSL_Outlier_Count,DSL_Success_Rate,Winner,PPL_DSL_Ratio,Statistically_Significant,Performance_Outlier,Outlier_Reason
+1,SOURCE = flint_new_data_source_default_amazon_vpc_flow_v1__live_mview | STATS count(),"{""track_total_hits"":true,""aggs"":{},""size"":0,""stored_fields"":[""*""],""script_fields"":{},""docvalue_fields"":[{""field"":""@timestamp"",""format"":""date_time""},{""field"":""aws.vpc.end"",""format"":""date_time""},{""field"":""aws.vpc.start"",""format"":""date_time""},{""field"":""observedTimestamp"",""format"":""date_time""},{""field"":""observerTime"",""format"":""date_time""}],""_source"":{""excludes"":[]}}",91.12,91.09,1.31,1.16,92.98,93.29,93.53,88.85,93.62,93.62,0,100.0,89.93,89.88,1.65,1.26,91.89,92.43,93.35,86.8,94.01,129.84,2,100.0,DSL,1.01,Yes,No,
+2,SOURCE = flint_new_data_source_default_amazon_vpc_flow_v1__live_mview | STATS count() as Count by aws.vpc.action | SORT - Count | HEAD 5,"{""track_total_hits"":true,""aggs"":{""2"":{""terms"":{""field"":""aws.vpc.action"",""order"":{""1"":""desc""},""size"":5},""aggs"":{""1"":{""sum"":{""field"":""aws.vpc.total_count""}}}}},""size"":0,""stored_fields"":[""*""],""script_fields"":{},""docvalue_fields"":[{""field"":""start_time"",""format"":""date_time""}],""_source"":{""excludes"":[]}}",93.03,93.32,1.18,0.82,94.27,94.7,94.85,90.26,95.12,95.12,0,100.0,91.12,91.15,1.24,0.86,92.58,92.87,93.37,88.07,93.73,96.64,1,100.0,DSL,1.02,Yes,No,
+3,"SOURCE = flint_new_data_source_default_amazon_vpc_flow_v1__live_mview | STATS count() by span(@timestamp, 30d)","{""track_total_hits"":true,""aggs"":{""2"":{""date_histogram"":{""field"":""@timestamp"",""fixed_interval"":""30d"",""time_zone"":""America/Los_Angeles"",""min_doc_count"":1}}},""size"":0,""stored_fields"":[""*""],""script_fields"":{},""docvalue_fields"":[{""field"":""@timestamp"",""format"":""date_time""},{""field"":""aws.vpc.end"",""format"":""date_time""},{""field"":""aws.vpc.start"",""format"":""date_time""},{""field"":""observedTimestamp"",""format"":""date_time""},{""field"":""observerTime"",""format"":""date_time""}],""_source"":{""excludes"":[]}}",91.22,91.28,0.88,0.67,92.35,92.61,92.91,89.31,93.02,95.97,2,100.0,90.04,90.13,1.13,0.76,91.38,91.76,93.0,87.64,94.26,103.13,2,100.0,DSL,1.01,Yes,No,
+4,SOURCE = flint_new_data_source_default_amazon_vpc_flow_v1__live_mview | STATS count() as Count by `aws.vpc.flow-direction` | SORT - Count | HEAD 5,"{""track_total_hits"":true,""aggs"":{""2"":{""terms"":{""field"":""aws.vpc.flow-direction"",""order"":{""_count"":""desc""},""size"":5}}},""size"":0,""stored_fields"":[""*""],""script_fields"":{},""docvalue_fields"":[{""field"":""@timestamp"",""format"":""date_time""},{""field"":""aws.vpc.end"",""format"":""date_time""},{""field"":""aws.vpc.start"",""format"":""date_time""},{""field"":""observedTimestamp"",""format"":""date_time""},{""field"":""observerTime"",""format"":""date_time""}],""_source"":{""excludes"":[]}}",92.01,92.12,1.38,0.83,93.85,94.07,94.78,89.0,96.54,112.86,3,100.0,90.52,90.64,1.26,0.88,91.89,92.49,92.98,86.97,93.03,97.22,1,100.0,DSL,1.02,Yes,No,
+5,"SOURCE = flint_new_data_source_default_amazon_vpc_flow_v1__live_mview | STATS sum(aws.vpc.bytes) by span(@timestamp, 30d)","{""track_total_hits"":true,""aggs"":{""2"":{""date_histogram"":{""field"":""@timestamp"",""fixed_interval"":""30d"",""time_zone"":""America/Los_Angeles"",""min_doc_count"":1},""aggs"":{""1"":{""sum"":{""field"":""aws.vpc.bytes""}}}}},""size"":0,""stored_fields"":[""*""],""script_fields"":{},""docvalue_fields"":[{""field"":""@timestamp"",""format"":""date_time""},{""field"":""aws.vpc.end"",""format"":""date_time""},{""field"":""aws.vpc.start"",""format"":""date_time""},{""field"":""observedTimestamp"",""format"":""date_time""},{""field"":""observerTime"",""format"":""date_time""}],""_source"":{""excludes"":[]}}",91.51,91.39,1.12,0.8,93.06,93.4,93.77,89.35,93.95,93.95,0,100.0,90.58,90.55,1.37,1.01,92.21,92.41,94.53,88.06,95.24,95.24,0,100.0,DSL,1.01,Yes,No,
+6,"SOURCE = flint_new_data_source_default_amazon_vpc_flow_v1__live_mview | STATS sum(aws.vpc.packets) by span(@timestamp, 30d)","{""track_total_hits"":true,""aggs"":{""2"":{""date_histogram"":{""field"":""@timestamp"",""fixed_interval"":""30d"",""time_zone"":""America/Los_Angeles"",""min_doc_count"":1},""aggs"":{""1"":{""sum"":{""field"":""aws.vpc.packets""}}}}},""size"":0,""stored_fields"":[""*""],""script_fields"":{},""docvalue_fields"":[{""field"":""@timestamp"",""format"":""date_time""},{""field"":""aws.vpc.end"",""format"":""date_time""},{""field"":""aws.vpc.start"",""format"":""date_time""},{""field"":""observedTimestamp"",""format"":""date_time""},{""field"":""observerTime"",""format"":""date_time""}],""_source"":{""excludes"":[]}}",92.13,92.15,1.21,0.81,93.47,93.84,94.33,88.77,94.42,94.42,0,100.0,91.38,91.47,1.13,0.79,92.62,92.87,93.37,88.38,93.64,93.64,0,100.0,DSL,1.01,Yes,No,
+7,SOURCE = flint_new_data_source_default_amazon_vpc_flow_v1__live_mview | STATS count() as Count by `aws.vpc.pkt-src-aws-service` | SORT - Count | HEAD 10,"{""track_total_hits"":true,""aggs"":{""2"":{""terms"":{""field"":""aws.vpc.pkt-src-aws-service"",""order"":{""_count"":""desc""},""size"":10}}},""size"":0,""stored_fields"":[""*""],""script_fields"":{},""docvalue_fields"":[{""field"":""@timestamp"",""format"":""date_time""},{""field"":""aws.vpc.end"",""format"":""date_time""},{""field"":""aws.vpc.start"",""format"":""date_time""},{""field"":""observedTimestamp"",""format"":""date_time""},{""field"":""observerTime"",""format"":""date_time""}],""_source"":{""excludes"":[]}}",91.98,91.93,1.33,0.96,93.6,94.28,94.89,89.03,94.9,94.9,0,100.0,90.94,90.91,1.22,0.88,92.44,92.7,93.6,88.35,94.47,94.47,0,100.0,DSL,1.01,Yes,No,
+8,SOURCE = flint_new_data_source_default_amazon_vpc_flow_v1__live_mview | STATS count() as Count by `aws.vpc.pkt-dst-aws-service` | SORT - Count | HEAD 10,"{""track_total_hits"":true,""aggs"":{""2"":{""terms"":{""field"":""aws.vpc.pkt-dst-aws-service"",""order"":{""_count"":""desc""},""size"":10}}},""size"":0,""stored_fields"":[""*""],""script_fields"":{},""docvalue_fields"":[{""field"":""@timestamp"",""format"":""date_time""},{""field"":""aws.vpc.end"",""format"":""date_time""},{""field"":""aws.vpc.start"",""format"":""date_time""},{""field"":""observedTimestamp"",""format"":""date_time""},{""field"":""observerTime"",""format"":""date_time""}],""_source"":{""excludes"":[]}}",91.94,91.9,1.11,0.79,93.36,93.52,94.46,89.71,95.76,95.76,0,100.0,90.4,90.38,1.36,0.99,91.94,92.59,93.87,87.91,94.12,94.12,0,100.0,DSL,1.02,Yes,No,
+9,SOURCE = flint_new_data_source_default_amazon_vpc_flow_v1__live_mview | stats sum(`aws.vpc.bytes`) as Bytes by `aws.vpc.dstaddr` | sort - Bytes | head 10,"{""track_total_hits"":true,""aggs"":{""2"":{""terms"":{""field"":""aws.vpc.dstaddr"",""order"":{""1"":""desc""},""size"":10},""aggs"":{""1"":{""sum"":{""field"":""aws.vpc.bytes""}}}}},""size"":0,""stored_fields"":[""*""],""script_fields"":{},""docvalue_fields"":[{""field"":""@timestamp"",""format"":""date_time""},{""field"":""aws.vpc.end"",""format"":""date_time""},{""field"":""aws.vpc.start"",""format"":""date_time""},{""field"":""observedTimestamp"",""format"":""date_time""},{""field"":""observerTime"",""format"":""date_time""}],""_source"":{""excludes"":[]}}",98.91,98.89,1.3,0.9,100.4,100.87,102.21,96.09,102.91,111.88,2,100.0,90.65,90.68,1.14,0.86,92.2,92.43,93.25,88.26,93.52,93.52,0,100.0,DSL,1.09,Yes,No,
+10,SOURCE = flint_new_data_source_default_amazon_vpc_flow_v1__live_mview | stats sum(`aws.vpc.bytes`) as Bytes by `aws.vpc.srcaddr` | sort - Bytes | head 10,"{""track_total_hits"":true,""aggs"":{""2"":{""terms"":{""field"":""aws.vpc.srcaddr"",""order"":{""1"":""desc""},""size"":10},""aggs"":{""1"":{""sum"":{""field"":""aws.vpc.bytes""}}}}},""size"":0,""stored_fields"":[""*""],""script_fields"":{},""docvalue_fields"":[{""field"":""@timestamp"",""format"":""date_time""},{""field"":""aws.vpc.end"",""format"":""date_time""},{""field"":""aws.vpc.start"",""format"":""date_time""},{""field"":""observedTimestamp"",""format"":""date_time""},{""field"":""observerTime"",""format"":""date_time""}],""_source"":{""excludes"":[]}}",98.78,98.86,1.23,0.75,100.39,101.09,101.58,96.27,101.76,101.76,0,100.0,90.85,90.86,1.06,0.75,92.25,92.65,93.25,88.33,93.43,93.43,0,100.0,DSL,1.09,Yes,No,
+11,SOURCE = flint_new_data_source_default_amazon_vpc_flow_v1__live_mview | stats sum(`aws.vpc.packets`) as Packets by `aws.vpc.srcaddr` | sort - Packets | head 10,"{""track_total_hits"":true,""aggs"":{""2"":{""terms"":{""field"":""aws.vpc.srcaddr"",""order"":{""1"":""desc""},""size"":10},""aggs"":{""1"":{""sum"":{""field"":""aws.vpc.packets""}}}}},""size"":0,""stored_fields"":[""*""],""script_fields"":{},""docvalue_fields"":[{""field"":""@timestamp"",""format"":""date_time""},{""field"":""aws.vpc.end"",""format"":""date_time""},{""field"":""aws.vpc.start"",""format"":""date_time""},{""field"":""observedTimestamp"",""format"":""date_time""},{""field"":""observerTime"",""format"":""date_time""}],""_source"":{""excludes"":[]}}",99.38,99.41,1.45,0.99,101.08,101.66,101.88,96.29,102.69,117.37,3,100.0,91.27,91.33,1.34,0.99,92.77,93.15,94.11,88.34,94.72,94.72,0,100.0,DSL,1.09,Yes,No,
+12,SOURCE = flint_new_data_source_default_amazon_vpc_flow_v1__live_mview | stats sum(`aws.vpc.packets`) as Packets by `aws.vpc.dstaddr` | sort - Packets | head 10,"{""track_total_hits"":true,""aggs"":{""2"":{""terms"":{""field"":""aws.vpc.dstaddr"",""order"":{""1"":""desc""},""size"":10},""aggs"":{""1"":{""sum"":{""field"":""aws.vpc.packets""}}}}},""size"":0,""stored_fields"":[""*""],""script_fields"":{},""docvalue_fields"":[{""field"":""@timestamp"",""format"":""date_time""},{""field"":""aws.vpc.end"",""format"":""date_time""},{""field"":""aws.vpc.start"",""format"":""date_time""},{""field"":""observedTimestamp"",""format"":""date_time""},{""field"":""observerTime"",""format"":""date_time""}],""_source"":{""excludes"":[]}}",98.71,98.74,1.23,0.91,100.37,100.79,101.55,96.36,102.07,107.46,1,100.0,90.53,90.35,1.16,0.74,92.05,92.52,93.2,87.91,93.5,115.83,1,100.0,DSL,1.09,Yes,No,
+13,SOURCE = flint_new_data_source_default_amazon_vpc_flow_v1__live_mview | STATS count() as Count by aws.vpc.srcaddr | SORT - Count | HEAD 10,"{""track_total_hits"":true,""aggs"":{""2"":{""terms"":{""field"":""aws.vpc.srcaddr"",""order"":{""_count"":""desc""},""size"":10}}},""size"":0,""stored_fields"":[""*""],""script_fields"":{},""docvalue_fields"":[{""field"":""@timestamp"",""format"":""date_time""},{""field"":""aws.vpc.end"",""format"":""date_time""},{""field"":""aws.vpc.start"",""format"":""date_time""},{""field"":""observedTimestamp"",""format"":""date_time""},{""field"":""observerTime"",""format"":""date_time""}],""_source"":{""excludes"":[]}}",98.27,98.13,1.1,0.69,99.68,99.98,101.48,95.76,101.5,112.69,1,100.0,90.34,90.39,1.0,0.61,91.65,91.87,92.1,88.07,92.98,108.69,3,100.0,DSL,1.09,Yes,No,
+14,SOURCE = flint_new_data_source_default_amazon_vpc_flow_v1__live_mview | stats count() as Requests by `aws.vpc.dstaddr` | sort - Requests | head 10,"{""track_total_hits"":true,""aggs"":{""2"":{""terms"":{""field"":""aws.vpc.dstaddr"",""order"":{""_count"":""desc""},""size"":10}}},""size"":0,""stored_fields"":[""*""],""script_fields"":{},""docvalue_fields"":[{""field"":""@timestamp"",""format"":""date_time""},{""field"":""aws.vpc.end"",""format"":""date_time""},{""field"":""aws.vpc.start"",""format"":""date_time""},{""field"":""observedTimestamp"",""format"":""date_time""},{""field"":""observerTime"",""format"":""date_time""}],""_source"":{""excludes"":[]}}",98.38,98.52,1.36,0.88,99.91,100.34,101.32,95.35,102.34,109.02,1,100.0,91.12,91.34,1.31,0.88,92.71,93.01,93.6,88.0,93.7,93.7,0,100.0,DSL,1.08,Yes,No,
+15,"SOURCE = flint_new_data_source_default_amazon_vpc_flow_v1__live_mview | stats count() as Count by aws.vpc.dstaddr, aws.vpc.srcaddr | sort - Count | head 100","{""track_total_hits"":true,""aggs"":{""2"":{""terms"":{""field"":""aws.vpc.dstaddr"",""order"":{""_count"":""desc""},""size"":10},""aggs"":{""3"":{""terms"":{""field"":""aws.vpc.srcaddr"",""order"":{""_count"":""desc""},""size"":10}}}}},""size"":0,""stored_fields"":[""*""],""script_fields"":{},""docvalue_fields"":[{""field"":""@timestamp"",""format"":""date_time""},{""field"":""aws.vpc.end"",""format"":""date_time""},{""field"":""aws.vpc.start"",""format"":""date_time""},{""field"":""observedTimestamp"",""format"":""date_time""},{""field"":""observerTime"",""format"":""date_time""}],""_source"":{""excludes"":[]}}",99.75,100.07,1.34,0.75,101.21,101.88,102.09,96.39,102.1,102.1,0,100.0,92.71,93.0,1.41,0.92,94.44,94.78,95.36,89.62,95.49,95.49,0,100.0,DSL,1.08,Yes,No,
+
+
+=== INTERPRETATION GUIDE ===
+
+KEY METRICS EXPLAINED:
+PPL_Max_ms,Maximum execution time from CLEANED data (outliers removed) - represents typical worst case
+PPL_Raw_Max_ms,Maximum execution time from ALL data (including outliers) - represents absolute worst case
+PPL_Outlier_Count,Number of outlier executions detected (out of 100 total)
+PPL_DSL_Ratio,Performance ratio - how much slower/faster PPL is vs DSL (1.0 = equal performance)
+Performance_Outlier,Yes = Query is an outlier compared to other queries; No = Normal performance
+Outlier_Reason,"Why query was flagged - e.g., Slow_vs_DSL, High_Outlier_Rate, Slow_PPL_Absolute"
+
+HEALTH INDICATORS:
+Metric,Healthy,Needs Attention,Critical
+PPL_Outlier_Count,0-2,3-5,>5
+Raw vs Clean Max Difference,<10%,10-25%,>25%
+PPL_DSL_Ratio,<1.1 (±10%),1.1-1.5 (10-50% slower),>1.5 (>50% slower)
+PPL_Success_Rate,≥95%,80-95%,<80%
+Performance_Outlier,No,-,Yes
+
+HOW TO IDENTIFY PROBLEMATIC QUERIES:
+1. Check Performance_Outlier column,Yes = Query needs investigation
+2. Check PPL_Outlier_Count,>5 outliers = Inconsistent performance (network/cluster issues)
+3. Check PPL_DSL_Ratio,>1.5 = PPL significantly slower than DSL (optimization opportunity)
+4. Check PPL_Success_Rate,<95% = Query reliability issues
+5. Compare PPL_Raw_Max_ms vs PPL_Max_ms,>25% difference = Large performance spikes
+
+OUTLIER DETECTION METHOD:
+Algorithm,Modified Z-Score using MAD (Median Absolute Deviation)
+Threshold,3.5 (default)
+Reference,Iglewicz & Hoaglin (1993) - How to Detect and Handle Outliers
+Purpose,"Identifies statistical anomalies caused by network issues, GC pauses, cluster delays"
+
+TEST SUMMARY:
+Total Queries Tested,15
+Queries Flagged as Outliers,0
+Iterations per Query,100
+PPL Outlier Executions,13/1500 (0.9%)
+DSL Outlier Executions,10/1500 (0.7%)
+Average PPL/DSL Ratio,1.05
+Outlier Detection Threshold,3.5
+
+
+=== PER-QUERY OUTLIER ANALYSIS ===
+
+This section explains why each query was or was not flagged as an outlier.
+"Three detection criteria are evaluated: PPL/DSL Ratio, Outlier Execution Rate, and Absolute Performance."
+
+
+Query #1,✓ Normal Performance
+PPL Median,91.09ms
+DSL Median,89.88ms
+Success Rate,100.0%
+
+Criterion 1: PPL/DSL Performance Ratio
+  Value,1.01x
+  Threshold,≤1.5x (PPL should not be >50% slower than DSL)
+  Status,✓ PASS
+
+Criterion 2: Outlier Execution Rate
+  Value,0/100 (0.0%)
+  Threshold,≤5% (no more than 5 outlier executions per 100)
+  Status,✓ PASS
+
+Criterion 3: Absolute Performance (vs other queries)
+  Value,91.09ms
+  Threshold,≤109.13ms (Q3 + 1.5×IQR)
+  Status,✓ PASS
+
+Additional Diagnostics:
+  Raw vs Clean Max Diff,0.0% (93.62ms vs 93.62ms)
+  P95 Latency,93.29ms
+  Variability (MAD),1.16ms
+
+VERDICT,✓ HEALTHY - Passed all outlier detection criteria
+
+Query #2,✓ Normal Performance
+PPL Median,93.32ms
+DSL Median,91.15ms
+Success Rate,100.0%
+
+Criterion 1: PPL/DSL Performance Ratio
+  Value,1.02x
+  Threshold,≤1.5x (PPL should not be >50% slower than DSL)
+  Status,✓ PASS
+
+Criterion 2: Outlier Execution Rate
+  Value,0/100 (0.0%)
+  Threshold,≤5% (no more than 5 outlier executions per 100)
+  Status,✓ PASS
+
+Criterion 3: Absolute Performance (vs other queries)
+  Value,93.32ms
+  Threshold,≤109.13ms (Q3 + 1.5×IQR)
+  Status,✓ PASS
+
+Additional Diagnostics:
+  Raw vs Clean Max Diff,0.0% (95.12ms vs 95.12ms)
+  P95 Latency,94.7ms
+  Variability (MAD),0.82ms
+
+VERDICT,✓ HEALTHY - Passed all outlier detection criteria
+
+Query #3,✓ Normal Performance
+PPL Median,91.28ms
+DSL Median,90.13ms
+Success Rate,100.0%
+
+Criterion 1: PPL/DSL Performance Ratio
+  Value,1.01x
+  Threshold,≤1.5x (PPL should not be >50% slower than DSL)
+  Status,✓ PASS
+
+Criterion 2: Outlier Execution Rate
+  Value,2/100 (2.0%)
+  Threshold,≤5% (no more than 5 outlier executions per 100)
+  Status,✓ PASS
+
+Criterion 3: Absolute Performance (vs other queries)
+  Value,91.28ms
+  Threshold,≤109.13ms (Q3 + 1.5×IQR)
+  Status,✓ PASS
+
+Additional Diagnostics:
+  Raw vs Clean Max Diff,3.2% (95.97ms vs 93.02ms)
+  P95 Latency,92.61ms
+  Variability (MAD),0.67ms
+
+VERDICT,✓ HEALTHY - Passed all outlier detection criteria
+Note,Had 2 outlier executions but within acceptable range (<5%)
+
+Query #4,✓ Normal Performance
+PPL Median,92.12ms
+DSL Median,90.64ms
+Success Rate,100.0%
+
+Criterion 1: PPL/DSL Performance Ratio
+  Value,1.02x
+  Threshold,≤1.5x (PPL should not be >50% slower than DSL)
+  Status,✓ PASS
+
+Criterion 2: Outlier Execution Rate
+  Value,3/100 (3.0%)
+  Threshold,≤5% (no more than 5 outlier executions per 100)
+  Status,✓ PASS
+
+Criterion 3: Absolute Performance (vs other queries)
+  Value,92.12ms
+  Threshold,≤109.13ms (Q3 + 1.5×IQR)
+  Status,✓ PASS
+
+Additional Diagnostics:
+  Raw vs Clean Max Diff,16.9% (112.86ms vs 96.54ms)
+  P95 Latency,94.07ms
+  Variability (MAD),0.83ms
+
+VERDICT,✓ HEALTHY - Passed all outlier detection criteria
+Note,Had 3 outlier executions but within acceptable range (<5%)
+
+Query #5,✓ Normal Performance
+PPL Median,91.39ms
+DSL Median,90.55ms
+Success Rate,100.0%
+
+Criterion 1: PPL/DSL Performance Ratio
+  Value,1.01x
+  Threshold,≤1.5x (PPL should not be >50% slower than DSL)
+  Status,✓ PASS
+
+Criterion 2: Outlier Execution Rate
+  Value,0/100 (0.0%)
+  Threshold,≤5% (no more than 5 outlier executions per 100)
+  Status,✓ PASS
+
+Criterion 3: Absolute Performance (vs other queries)
+  Value,91.39ms
+  Threshold,≤109.13ms (Q3 + 1.5×IQR)
+  Status,✓ PASS
+
+Additional Diagnostics:
+  Raw vs Clean Max Diff,0.0% (93.95ms vs 93.95ms)
+  P95 Latency,93.4ms
+  Variability (MAD),0.8ms
+
+VERDICT,✓ HEALTHY - Passed all outlier detection criteria
+
+Query #6,✓ Normal Performance
+PPL Median,92.15ms
+DSL Median,91.47ms
+Success Rate,100.0%
+
+Criterion 1: PPL/DSL Performance Ratio
+  Value,1.01x
+  Threshold,≤1.5x (PPL should not be >50% slower than DSL)
+  Status,✓ PASS
+
+Criterion 2: Outlier Execution Rate
+  Value,0/100 (0.0%)
+  Threshold,≤5% (no more than 5 outlier executions per 100)
+  Status,✓ PASS
+
+Criterion 3: Absolute Performance (vs other queries)
+  Value,92.15ms
+  Threshold,≤109.13ms (Q3 + 1.5×IQR)
+  Status,✓ PASS
+
+Additional Diagnostics:
+  Raw vs Clean Max Diff,0.0% (94.42ms vs 94.42ms)
+  P95 Latency,93.84ms
+  Variability (MAD),0.81ms
+
+VERDICT,✓ HEALTHY - Passed all outlier detection criteria
+
+Query #7,✓ Normal Performance
+PPL Median,91.93ms
+DSL Median,90.91ms
+Success Rate,100.0%
+
+Criterion 1: PPL/DSL Performance Ratio
+  Value,1.01x
+  Threshold,≤1.5x (PPL should not be >50% slower than DSL)
+  Status,✓ PASS
+
+Criterion 2: Outlier Execution Rate
+  Value,0/100 (0.0%)
+  Threshold,≤5% (no more than 5 outlier executions per 100)
+  Status,✓ PASS
+
+Criterion 3: Absolute Performance (vs other queries)
+  Value,91.93ms
+  Threshold,≤109.13ms (Q3 + 1.5×IQR)
+  Status,✓ PASS
+
+Additional Diagnostics:
+  Raw vs Clean Max Diff,0.0% (94.9ms vs 94.9ms)
+  P95 Latency,94.28ms
+  Variability (MAD),0.96ms
+
+VERDICT,✓ HEALTHY - Passed all outlier detection criteria
+
+Query #8,✓ Normal Performance
+PPL Median,91.9ms
+DSL Median,90.38ms
+Success Rate,100.0%
+
+Criterion 1: PPL/DSL Performance Ratio
+  Value,1.02x
+  Threshold,≤1.5x (PPL should not be >50% slower than DSL)
+  Status,✓ PASS
+
+Criterion 2: Outlier Execution Rate
+  Value,0/100 (0.0%)
+  Threshold,≤5% (no more than 5 outlier executions per 100)
+  Status,✓ PASS
+
+Criterion 3: Absolute Performance (vs other queries)
+  Value,91.9ms
+  Threshold,≤109.13ms (Q3 + 1.5×IQR)
+  Status,✓ PASS
+
+Additional Diagnostics:
+  Raw vs Clean Max Diff,0.0% (95.76ms vs 95.76ms)
+  P95 Latency,93.52ms
+  Variability (MAD),0.79ms
+
+VERDICT,✓ HEALTHY - Passed all outlier detection criteria
+
+Query #9,✓ Normal Performance
+PPL Median,98.89ms
+DSL Median,90.68ms
+Success Rate,100.0%
+
+Criterion 1: PPL/DSL Performance Ratio
+  Value,1.09x
+  Threshold,≤1.5x (PPL should not be >50% slower than DSL)
+  Status,✓ PASS
+
+Criterion 2: Outlier Execution Rate
+  Value,2/100 (2.0%)
+  Threshold,≤5% (no more than 5 outlier executions per 100)
+  Status,✓ PASS
+
+Criterion 3: Absolute Performance (vs other queries)
+  Value,98.89ms
+  Threshold,≤109.13ms (Q3 + 1.5×IQR)
+  Status,✓ PASS
+
+Additional Diagnostics:
+  Raw vs Clean Max Diff,8.7% (111.88ms vs 102.91ms)
+  P95 Latency,100.87ms
+  Variability (MAD),0.9ms
+
+VERDICT,✓ HEALTHY - Passed all outlier detection criteria
+Note,Had 2 outlier executions but within acceptable range (<5%)
+
+Query #10,✓ Normal Performance
+PPL Median,98.86ms
+DSL Median,90.86ms
+Success Rate,100.0%
+
+Criterion 1: PPL/DSL Performance Ratio
+  Value,1.09x
+  Threshold,≤1.5x (PPL should not be >50% slower than DSL)
+  Status,✓ PASS
+
+Criterion 2: Outlier Execution Rate
+  Value,0/100 (0.0%)
+  Threshold,≤5% (no more than 5 outlier executions per 100)
+  Status,✓ PASS
+
+Criterion 3: Absolute Performance (vs other queries)
+  Value,98.86ms
+  Threshold,≤109.13ms (Q3 + 1.5×IQR)
+  Status,✓ PASS
+
+Additional Diagnostics:
+  Raw vs Clean Max Diff,0.0% (101.76ms vs 101.76ms)
+  P95 Latency,101.09ms
+  Variability (MAD),0.75ms
+
+VERDICT,✓ HEALTHY - Passed all outlier detection criteria
+
+Query #11,✓ Normal Performance
+PPL Median,99.41ms
+DSL Median,91.33ms
+Success Rate,100.0%
+
+Criterion 1: PPL/DSL Performance Ratio
+  Value,1.09x
+  Threshold,≤1.5x (PPL should not be >50% slower than DSL)
+  Status,✓ PASS
+
+Criterion 2: Outlier Execution Rate
+  Value,3/100 (3.0%)
+  Threshold,≤5% (no more than 5 outlier executions per 100)
+  Status,✓ PASS
+
+Criterion 3: Absolute Performance (vs other queries)
+  Value,99.41ms
+  Threshold,≤109.13ms (Q3 + 1.5×IQR)
+  Status,✓ PASS
+
+Additional Diagnostics:
+  Raw vs Clean Max Diff,14.3% (117.37ms vs 102.69ms)
+  P95 Latency,101.66ms
+  Variability (MAD),0.99ms
+
+VERDICT,✓ HEALTHY - Passed all outlier detection criteria
+Note,Had 3 outlier executions but within acceptable range (<5%)
+
+Query #12,✓ Normal Performance
+PPL Median,98.74ms
+DSL Median,90.35ms
+Success Rate,100.0%
+
+Criterion 1: PPL/DSL Performance Ratio
+  Value,1.09x
+  Threshold,≤1.5x (PPL should not be >50% slower than DSL)
+  Status,✓ PASS
+
+Criterion 2: Outlier Execution Rate
+  Value,1/100 (1.0%)
+  Threshold,≤5% (no more than 5 outlier executions per 100)
+  Status,✓ PASS
+
+Criterion 3: Absolute Performance (vs other queries)
+  Value,98.74ms
+  Threshold,≤109.13ms (Q3 + 1.5×IQR)
+  Status,✓ PASS
+
+Additional Diagnostics:
+  Raw vs Clean Max Diff,5.3% (107.46ms vs 102.07ms)
+  P95 Latency,100.79ms
+  Variability (MAD),0.91ms
+
+VERDICT,✓ HEALTHY - Passed all outlier detection criteria
+Note,Had 1 outlier executions but within acceptable range (<5%)
+
+Query #13,✓ Normal Performance
+PPL Median,98.13ms
+DSL Median,90.39ms
+Success Rate,100.0%
+
+Criterion 1: PPL/DSL Performance Ratio
+  Value,1.09x
+  Threshold,≤1.5x (PPL should not be >50% slower than DSL)
+  Status,✓ PASS
+
+Criterion 2: Outlier Execution Rate
+  Value,1/100 (1.0%)
+  Threshold,≤5% (no more than 5 outlier executions per 100)
+  Status,✓ PASS
+
+Criterion 3: Absolute Performance (vs other queries)
+  Value,98.13ms
+  Threshold,≤109.13ms (Q3 + 1.5×IQR)
+  Status,✓ PASS
+
+Additional Diagnostics:
+  Raw vs Clean Max Diff,11.0% (112.69ms vs 101.5ms)
+  P95 Latency,99.98ms
+  Variability (MAD),0.69ms
+
+VERDICT,✓ HEALTHY - Passed all outlier detection criteria
+Note,Had 1 outlier executions but within acceptable range (<5%)
+
+Query #14,✓ Normal Performance
+PPL Median,98.52ms
+DSL Median,91.34ms
+Success Rate,100.0%
+
+Criterion 1: PPL/DSL Performance Ratio
+  Value,1.08x
+  Threshold,≤1.5x (PPL should not be >50% slower than DSL)
+  Status,✓ PASS
+
+Criterion 2: Outlier Execution Rate
+  Value,1/100 (1.0%)
+  Threshold,≤5% (no more than 5 outlier executions per 100)
+  Status,✓ PASS
+
+Criterion 3: Absolute Performance (vs other queries)
+  Value,98.52ms
+  Threshold,≤109.13ms (Q3 + 1.5×IQR)
+  Status,✓ PASS
+
+Additional Diagnostics:
+  Raw vs Clean Max Diff,6.5% (109.02ms vs 102.34ms)
+  P95 Latency,100.34ms
+  Variability (MAD),0.88ms
+
+VERDICT,✓ HEALTHY - Passed all outlier detection criteria
+Note,Had 1 outlier executions but within acceptable range (<5%)
+
+Query #15,✓ Normal Performance
+PPL Median,100.07ms
+DSL Median,93.0ms
+Success Rate,100.0%
+
+Criterion 1: PPL/DSL Performance Ratio
+  Value,1.08x
+  Threshold,≤1.5x (PPL should not be >50% slower than DSL)
+  Status,✓ PASS
+
+Criterion 2: Outlier Execution Rate
+  Value,0/100 (0.0%)
+  Threshold,≤5% (no more than 5 outlier executions per 100)
+  Status,✓ PASS
+
+Criterion 3: Absolute Performance (vs other queries)
+  Value,100.07ms
+  Threshold,≤109.13ms (Q3 + 1.5×IQR)
+  Status,✓ PASS
+
+Additional Diagnostics:
+  Raw vs Clean Max Diff,0.0% (102.1ms vs 102.1ms)
+  P95 Latency,101.88ms
+  Variability (MAD),0.75ms
+
+VERDICT,✓ HEALTHY - Passed all outlier detection criteria

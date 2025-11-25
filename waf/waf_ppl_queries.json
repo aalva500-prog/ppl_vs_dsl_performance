@@ -1,0 +1,379 @@
+Query #1:
+---------
+	
+SOURCE = flint_new_data_source_default_aws_waf__mview | STATS count()	
+
+POST flint_new_data_source_default_aws_waf__mview/_search
+{
+"track_total_hits": true,
+"size": 0,
+"stored_fields": [
+"*"
+],
+"script_fields": {},
+"docvalue_fields": [
+{
+"field": "@timestamp",
+"format": "date_time"
+},
+{
+"field": "timestamp",
+"format": "date_time"
+}
+],
+"_source": {
+"excludes": []
+}
+}
+
+Query #2:
+---------
+
+SOURCE = flint_new_data_source_default_aws_waf__mview | STATS count() as Count by span(@timestamp, 30d), aws.waf.action | rename aws.waf.action as Action | SORT - Count	| HEAD 5
+
+POST flint_new_data_source_default_aws_waf__mview/_search
+{
+"track_total_hits": true,
+"aggs": {
+"2": {
+"date_histogram": {
+"field": "@timestamp",
+"fixed_interval": "30d",
+"time_zone": "America/Los_Angeles",
+"min_doc_count": 1
+},
+"aggs": {
+"3": {
+"terms": {
+"field": "aws.waf.action",
+"order": {
+"_count": "desc"
+},
+"size": 5
+}
+}
+}
+}
+},
+"size": 0,
+"stored_fields": [
+"*"
+],
+"script_fields": {},
+"docvalue_fields": [
+{
+"field": "@timestamp",
+"format": "date_time"
+},
+{
+"field": "timestamp",
+"format": "date_time"
+}
+],
+"_source": {
+"excludes": []
+},
+"query": {
+"bool": {
+"must": [],
+"filter": [
+{
+"match_all": {}
+}
+],
+"should": [],
+"must_not": []
+}
+}
+}
+
+Query #3:
+---------
+
+SOURCE = flint_new_data_source_default_aws_waf__mview | STATS count() as `Count` by `aws.waf.webaclId` | SORT - `Count` | HEAD 10	
+
+POST flint_new_data_source_default_aws_waf__mview/_search
+{
+"track_total_hits": true,
+"aggs": {
+  "2": {
+    "terms": {
+      "field": "aws.waf.webaclId",
+      "order": {
+        "_count": "desc"
+      },
+      "size": 10
+    }
+  }
+},
+"size": 0,
+"stored_fields": [
+"*"
+],
+"script_fields": {},
+"docvalue_fields": [
+{
+"field": "start_time",
+"format": "date_time"
+}
+],
+"_source": {
+"excludes": []
+},
+"query": {
+"bool": {
+"must": [],
+"filter": [
+{
+"match_all": {}
+}
+],
+"should": [],
+"must_not": []
+}
+}
+}
+
+Query #4:
+---------
+
+SOURCE = flint_new_data_source_default_aws_waf__mview | STATS count() as Count by `aws.waf.httpSourceId` | SORT - Count | Head 5	
+
+POST flint_new_data_source_default_aws_waf__mview/_search
+{
+"track_total_hits": true,
+"aggs": {
+"2": {
+"terms": {
+"field": "aws.waf.httpSourceId",
+"order": {
+"_count": "desc"
+},
+"size": 5
+}
+}
+},
+"size": 0,
+"stored_fields": [
+"*"
+],
+"script_fields": {},
+"docvalue_fields": [
+{
+"field": "@timestamp",
+"format": "date_time"
+},
+{
+"field": "timestamp",
+"format": "date_time"
+}
+],
+"_source": {
+"excludes": []
+}
+}
+
+Query #5:
+---------
+
+SOURCE = flint_new_data_source_default_aws_waf__mview | STATS count() as `Count` by `aws.waf.httpRequest.clientIp` | SORT - `Count` | HEAD 10	
+
+POST flint_new_data_source_default_aws_waf__mview/_search
+{
+"track_total_hits": true,
+"aggs": {
+"2": {
+"terms": {
+"field": "aws.waf.httpRequest.clientIp",
+"order": {
+"_count": "desc"
+},
+"size": 10
+}
+}
+},
+"size": 0,
+"stored_fields": [
+"*"
+],
+"script_fields": {},
+"docvalue_fields": [
+{
+"field": "@timestamp",
+"format": "date_time"
+},
+{
+"field": "timestamp",
+"format": "date_time"
+}
+],
+"_source": {
+"excludes": []
+}
+}
+
+Query #6:
+---------
+
+SOURCE = flint_new_data_source_default_aws_waf__mview | STATS count() as Count by `aws.waf.httpRequest.country` | SORT - Count	
+
+POST flint_new_data_source_default_aws_waf__mview/_search
+{
+"track_total_hits": true,
+"aggs": {
+"2": {
+"terms": {
+"field": "aws.waf.httpRequest.country",
+"order": {
+"_count": "desc"
+},
+"size": 10
+}
+}
+},
+"size": 0,
+"stored_fields": [
+"*"
+],
+"script_fields": {},
+"docvalue_fields": [
+{
+"field": "@timestamp",
+"format": "date_time"
+},
+{
+"field": "timestamp",
+"format": "date_time"
+}
+],
+"_source": {
+"excludes": []
+}
+}
+
+Query #7:
+---------
+
+SOURCE = flint_new_data_source_default_aws_waf__mview | stats count() as Count by `aws.waf.terminatingRuleId` | sort - Count | head 10	
+
+POST flint_new_data_source_default_aws_waf__mview/_search
+{
+"track_total_hits": true,
+"aggs": {
+"2": {
+"terms": {
+"field": "aws.waf.terminatingRuleId",
+"order": {
+"_count": "desc"
+},
+"size": 10
+}
+}
+},
+"size": 0,
+"stored_fields": [
+"*"
+],
+"script_fields": {},
+"docvalue_fields": [
+{
+"field": "@timestamp",
+"format": "date_time"
+},
+{
+"field": "timestamp",
+"format": "date_time"
+}
+],
+"_source": {
+"excludes": []
+}
+}
+
+Query #8:
+---------
+
+SOURCE = flint_new_data_source_default_aws_waf__mview | WHERE aws.waf.action = "BLOCK" | STATS count() as `Total Blocked Requests`	
+
+POST flint_new_data_source_default_aws_waf__mview/_search
+{
+"track_total_hits": true,
+"aggs": {},
+"size": 0,
+"stored_fields": [
+"*"
+],
+"script_fields": {},
+"docvalue_fields": [
+{
+"field": "@timestamp",
+"format": "date_time"
+},
+{
+"field": "timestamp",
+"format": "date_time"
+}
+],
+"_source": {
+"excludes": []
+},
+"query": {
+"bool": {
+"must": [
+{
+"query_string": {
+"query": "aws.waf.action:BLOCK",
+"analyze_wildcard": true,
+"time_zone": "America/Los_Angeles"
+}
+}
+],
+"filter": [
+{
+"match_all": {}
+}
+],
+"should": [],
+"must_not": []
+}
+}
+}
+
+Query #9:
+---------
+
+SOURCE = flint_new_data_source_default_aws_waf__mview | stats count() as Count by `aws.waf.httpRequest.uri` | sort - Count | head 10	
+
+POST flint_new_data_source_default_aws_waf__mview/_search
+{
+"track_total_hits": true,
+"aggs": {
+"2": {
+"terms": {
+"field": "aws.waf.httpRequest.uri",
+"order": {
+"_count": "desc"
+},
+"size": 10
+}
+}
+},
+"size": 0,
+"stored_fields": [
+"*"
+],
+"script_fields": {},
+"docvalue_fields": [
+{
+"field": "@timestamp",
+"format": "date_time"
+},
+{
+"field": "timestamp",
+"format": "date_time"
+}
+],
+"_source": {
+"excludes": []
+}
+}

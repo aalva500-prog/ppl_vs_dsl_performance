@@ -1,0 +1,794 @@
+Query #1:
+--------
+
+SOURCE = flint_new_data_source_default_amazon_vpc_flow_v1__live_mview | STATS count()	
+
+POST flint_new_data_source_default_amazon_vpc_flow_v1__live_mview/_search {
+"track_total_hits": true,
+"aggs": {},
+"size": 0,
+"stored_fields": [
+"*"
+],
+"script_fields": {},
+"docvalue_fields": [
+{
+"field": "@timestamp",
+"format": "date_time"
+},
+{
+"field": "aws.vpc.end",
+"format": "date_time"
+},
+{
+"field": "aws.vpc.start",
+"format": "date_time"
+},
+{
+"field": "observedTimestamp",
+"format": "date_time"
+},
+{
+"field": "observerTime",
+"format": "date_time"
+}
+],
+"_source": {
+"excludes": []
+}
+}
+
+Query #2:
+--------
+
+SOURCE = flint_new_data_source_default_amazon_vpc_flow_v1__live_mview | STATS count() as Count by aws.vpc.action | SORT - Count | HEAD 5	
+
+POST flint_new_data_source_default_amazon_vpc_flow_v1__live_mview/_search
+{
+"track_total_hits": true,
+"aggs": {
+"2": {
+"terms": {
+"field": "aws.vpc.action",
+"order": {
+"1": "desc"
+},
+"size": 5
+},
+"aggs": {
+"1": {
+"sum": {
+"field": "aws.vpc.total_count"
+}
+}
+}
+}
+},
+"size": 0,
+"stored_fields": [
+"*"
+],
+"script_fields": {},
+"docvalue_fields": [
+{
+"field": "start_time",
+"format": "date_time"
+}
+],
+"_source": {
+"excludes": []
+}
+}
+
+Query #3:
+--------
+
+SOURCE = flint_new_data_source_default_amazon_vpc_flow_v1__live_mview | STATS count() by span(@timestamp, 30d)	
+
+POST flint_new_data_source_default_amazon_vpc_flow_v1__live_mview/_search
+{
+"track_total_hits": true,
+"aggs": {
+"2": {
+"date_histogram": {
+"field": "@timestamp",
+"fixed_interval": "30d",
+"time_zone": "America/Los_Angeles",
+"min_doc_count": 1
+}
+}
+},
+"size": 0,
+"stored_fields": [
+"*"
+],
+"script_fields": {},
+"docvalue_fields": [
+{
+"field": "@timestamp",
+"format": "date_time"
+},
+{
+"field": "aws.vpc.end",
+"format": "date_time"
+},
+{
+"field": "aws.vpc.start",
+"format": "date_time"
+},
+{
+"field": "observedTimestamp",
+"format": "date_time"
+},
+{
+"field": "observerTime",
+"format": "date_time"
+}
+],
+"_source": {
+"excludes": []
+}
+}
+
+Query #4:
+--------
+
+SOURCE = flint_new_data_source_default_amazon_vpc_flow_v1__live_mview | STATS count() as Count by `aws.vpc.flow-direction` | SORT - Count | HEAD 5	
+
+POST flint_new_data_source_default_amazon_vpc_flow_v1__live_mview/_search
+{
+"track_total_hits": true,
+"aggs": {
+"2": {
+"terms": {
+"field": "aws.vpc.flow-direction",
+"order": {
+"_count": "desc"
+},
+"size": 5
+}
+}
+},
+"size": 0,
+"stored_fields": [
+"*"
+],
+"script_fields": {},
+"docvalue_fields": [
+{
+"field": "@timestamp",
+"format": "date_time"
+},
+{
+"field": "aws.vpc.end",
+"format": "date_time"
+},
+{
+"field": "aws.vpc.start",
+"format": "date_time"
+},
+{
+"field": "observedTimestamp",
+"format": "date_time"
+},
+{
+"field": "observerTime",
+"format": "date_time"
+}
+],
+"_source": {
+"excludes": []
+}
+}
+
+Query #5:
+--------
+
+SOURCE = flint_new_data_source_default_amazon_vpc_flow_v1__live_mview | STATS sum(aws.vpc.bytes) by span(@timestamp, 30d)	
+
+POST flint_new_data_source_default_amazon_vpc_flow_v1__live_mview/_search
+{
+"track_total_hits": true,
+"aggs": {
+"2": {
+"date_histogram": {
+"field": "@timestamp",
+"fixed_interval": "30d",
+"time_zone": "America/Los_Angeles",
+"min_doc_count": 1
+},
+"aggs": {
+"1": {
+"sum": {
+"field": "aws.vpc.bytes"
+}
+}
+}
+}
+},
+"size": 0,
+"stored_fields": [
+"*"
+],
+"script_fields": {},
+"docvalue_fields": [
+{
+"field": "@timestamp",
+"format": "date_time"
+},
+{
+"field": "aws.vpc.end",
+"format": "date_time"
+},
+{
+"field": "aws.vpc.start",
+"format": "date_time"
+},
+{
+"field": "observedTimestamp",
+"format": "date_time"
+},
+{
+"field": "observerTime",
+"format": "date_time"
+}
+],
+"_source": {
+"excludes": []
+}
+}
+
+Query #6:
+--------
+
+SOURCE = flint_new_data_source_default_amazon_vpc_flow_v1__live_mview | STATS sum(aws.vpc.packets) by span(@timestamp, 30d)	
+
+POST flint_new_data_source_default_amazon_vpc_flow_v1__live_mview/_search
+{
+"track_total_hits": true,
+"aggs": {
+"2": {
+"date_histogram": {
+"field": "@timestamp",
+"fixed_interval": "30d",
+"time_zone": "America/Los_Angeles",
+"min_doc_count": 1
+},
+"aggs": {
+"1": {
+"sum": {
+"field": "aws.vpc.packets"
+}
+}
+}
+}
+},
+"size": 0,
+"stored_fields": [
+"*"
+],
+"script_fields": {},
+"docvalue_fields": [
+{
+"field": "@timestamp",
+"format": "date_time"
+},
+{
+"field": "aws.vpc.end",
+"format": "date_time"
+},
+{
+"field": "aws.vpc.start",
+"format": "date_time"
+},
+{
+"field": "observedTimestamp",
+"format": "date_time"
+},
+{
+"field": "observerTime",
+"format": "date_time"
+}
+],
+"_source": {
+"excludes": []
+}
+}
+
+Query #7:
+--------
+
+SOURCE = flint_new_data_source_default_amazon_vpc_flow_v1__live_mview | STATS count() as Count by `aws.vpc.pkt-src-aws-service` | SORT - Count | HEAD 10	
+
+POST flint_new_data_source_default_amazon_vpc_flow_v1__live_mview/_search
+{
+"track_total_hits": true,
+"aggs": {
+"2": {
+"terms": {
+"field": "aws.vpc.pkt-src-aws-service",
+"order": {
+"_count": "desc"
+},
+"size": 10
+}
+}
+},
+"size": 0,
+"stored_fields": [
+"*"
+],
+"script_fields": {},
+"docvalue_fields": [
+{
+"field": "@timestamp",
+"format": "date_time"
+},
+{
+"field": "aws.vpc.end",
+"format": "date_time"
+},
+{
+"field": "aws.vpc.start",
+"format": "date_time"
+},
+{
+"field": "observedTimestamp",
+"format": "date_time"
+},
+{
+"field": "observerTime",
+"format": "date_time"
+}
+],
+"_source": {
+"excludes": []
+}
+}
+
+Query #8:
+--------
+
+SOURCE = flint_new_data_source_default_amazon_vpc_flow_v1__live_mview | STATS count() as Count by `aws.vpc.pkt-dst-aws-service` | SORT - Count | HEAD 10	
+
+POST flint_new_data_source_default_amazon_vpc_flow_v1__live_mview/_search
+{
+"track_total_hits": true,
+"aggs": {
+"2": {
+"terms": {
+"field": "aws.vpc.pkt-dst-aws-service",
+"order": {
+"_count": "desc"
+},
+"size": 10
+}
+}
+},
+"size": 0,
+"stored_fields": [
+"*"
+],
+"script_fields": {},
+"docvalue_fields": [
+{
+"field": "@timestamp",
+"format": "date_time"
+},
+{
+"field": "aws.vpc.end",
+"format": "date_time"
+},
+{
+"field": "aws.vpc.start",
+"format": "date_time"
+},
+{
+"field": "observedTimestamp",
+"format": "date_time"
+},
+{
+"field": "observerTime",
+"format": "date_time"
+}
+],
+"_source": {
+"excludes": []
+}
+}
+
+Query #9:
+--------
+
+SOURCE = flint_new_data_source_default_amazon_vpc_flow_v1__live_mview | stats sum(`aws.vpc.bytes`) as Bytes by `aws.vpc.dstaddr` | sort - Bytes | head 10	
+
+POST flint_new_data_source_default_amazon_vpc_flow_v1__live_mview/_search
+{
+"track_total_hits": true,
+"aggs": {
+"2": {
+"terms": {
+"field": "aws.vpc.dstaddr",
+"order": {
+"1": "desc"
+},
+"size": 10
+},
+"aggs": {
+"1": {
+"sum": {
+"field": "aws.vpc.bytes"
+}
+}
+}
+}
+},
+"size": 0,
+"stored_fields": [
+"*"
+],
+"script_fields": {},
+"docvalue_fields": [
+{
+"field": "@timestamp",
+"format": "date_time"
+},
+{
+"field": "aws.vpc.end",
+"format": "date_time"
+},
+{
+"field": "aws.vpc.start",
+"format": "date_time"
+},
+{
+"field": "observedTimestamp",
+"format": "date_time"
+},
+{
+"field": "observerTime",
+"format": "date_time"
+}
+],
+"_source": {
+"excludes": []
+}
+}
+
+Query #10:
+---------
+
+SOURCE = flint_new_data_source_default_amazon_vpc_flow_v1__live_mview | stats sum(`aws.vpc.bytes`) as Bytes by `aws.vpc.srcaddr` | sort - Bytes | head 10	
+
+POST flint_new_data_source_default_amazon_vpc_flow_v1__live_mview/_search
+{
+"track_total_hits": true,
+"aggs": {
+"2": {
+"terms": {
+"field": "aws.vpc.srcaddr",
+"order": {
+"1": "desc"
+},
+"size": 10
+},
+"aggs": {
+"1": {
+"sum": {
+"field": "aws.vpc.bytes"
+}
+}
+}
+}
+},
+"size": 0,
+"stored_fields": [
+"*"
+],
+"script_fields": {},
+"docvalue_fields": [
+{
+"field": "@timestamp",
+"format": "date_time"
+},
+{
+"field": "aws.vpc.end",
+"format": "date_time"
+},
+{
+"field": "aws.vpc.start",
+"format": "date_time"
+},
+{
+"field": "observedTimestamp",
+"format": "date_time"
+},
+{
+"field": "observerTime",
+"format": "date_time"
+}
+],
+"_source": {
+"excludes": []
+}
+}
+
+Query #11:
+---------
+
+SOURCE = flint_new_data_source_default_amazon_vpc_flow_v1__live_mview | stats sum(`aws.vpc.packets`) as Packets by `aws.vpc.srcaddr` | sort - Packets | head 10	
+
+POST flint_new_data_source_default_amazon_vpc_flow_v1__live_mview/_search
+{
+"track_total_hits": true,
+"aggs": {
+"2": {
+"terms": {
+"field": "aws.vpc.srcaddr",
+"order": {
+"1": "desc"
+},
+"size": 10
+},
+"aggs": {
+"1": {
+"sum": {
+"field": "aws.vpc.packets"
+}
+}
+}
+}
+},
+"size": 0,
+"stored_fields": [
+"*"
+],
+"script_fields": {},
+"docvalue_fields": [
+{
+"field": "@timestamp",
+"format": "date_time"
+},
+{
+"field": "aws.vpc.end",
+"format": "date_time"
+},
+{
+"field": "aws.vpc.start",
+"format": "date_time"
+},
+{
+"field": "observedTimestamp",
+"format": "date_time"
+},
+{
+"field": "observerTime",
+"format": "date_time"
+}
+],
+"_source": {
+"excludes": []
+}
+}
+
+Query #12:
+---------
+
+SOURCE = flint_new_data_source_default_amazon_vpc_flow_v1__live_mview | stats sum(`aws.vpc.packets`) as Packets by `aws.vpc.dstaddr` | sort - Packets | head 10
+
+POST flint_new_data_source_default_amazon_vpc_flow_v1__live_mview/_search
+{
+"track_total_hits": true,
+"aggs": {
+"2": {
+"terms": {
+"field": "aws.vpc.dstaddr",
+"order": {
+"1": "desc"
+},
+"size": 10
+},
+"aggs": {
+"1": {
+"sum": {
+"field": "aws.vpc.packets"
+}
+}
+}
+}
+},
+"size": 0,
+"stored_fields": [
+"*"
+],
+"script_fields": {},
+"docvalue_fields": [
+{
+"field": "@timestamp",
+"format": "date_time"
+},
+{
+"field": "aws.vpc.end",
+"format": "date_time"
+},
+{
+"field": "aws.vpc.start",
+"format": "date_time"
+},
+{
+"field": "observedTimestamp",
+"format": "date_time"
+},
+{
+"field": "observerTime",
+"format": "date_time"
+}
+],
+"_source": {
+"excludes": []
+}
+}
+
+Query #13:
+---------
+
+SOURCE = flint_new_data_source_default_amazon_vpc_flow_v1__live_mview | STATS count() as Count by aws.vpc.srcaddr | SORT - Count | HEAD 10	
+
+POST flint_new_data_source_default_amazon_vpc_flow_v1__live_mview/_search
+{
+"track_total_hits": true,
+"aggs": {
+"2": {
+"terms": {
+"field": "aws.vpc.srcaddr",
+"order": {
+"_count": "desc"
+},
+"size": 10
+}
+}
+},
+"size": 0,
+"stored_fields": [
+"*"
+],
+"script_fields": {},
+"docvalue_fields": [
+{
+"field": "@timestamp",
+"format": "date_time"
+},
+{
+"field": "aws.vpc.end",
+"format": "date_time"
+},
+{
+"field": "aws.vpc.start",
+"format": "date_time"
+},
+{
+"field": "observedTimestamp",
+"format": "date_time"
+},
+{
+"field": "observerTime",
+"format": "date_time"
+}
+],
+"_source": {
+"excludes": []
+}
+}
+
+Query #14:
+---------
+
+SOURCE = flint_new_data_source_default_amazon_vpc_flow_v1__live_mview | stats count() as Requests by `aws.vpc.dstaddr` | sort - Requests | head 10	
+
+POST flint_new_data_source_default_amazon_vpc_flow_v1__live_mview/_search
+{
+"track_total_hits": true,
+"aggs": {
+"2": {
+"terms": {
+"field": "aws.vpc.dstaddr",
+"order": {
+"_count": "desc"
+},
+"size": 10
+}
+}
+},
+"size": 0,
+"stored_fields": [
+"*"
+],
+"script_fields": {},
+"docvalue_fields": [
+{
+"field": "@timestamp",
+"format": "date_time"
+},
+{
+"field": "aws.vpc.end",
+"format": "date_time"
+},
+{
+"field": "aws.vpc.start",
+"format": "date_time"
+},
+{
+"field": "observedTimestamp",
+"format": "date_time"
+},
+{
+"field": "observerTime",
+"format": "date_time"
+}
+],
+"_source": {
+"excludes": []
+}
+}
+
+Query #15:
+---------
+
+SOURCE = flint_new_data_source_default_amazon_vpc_flow_v1__live_mview | stats count() as Count by aws.vpc.dstaddr, aws.vpc.srcaddr | sort - Count | head 100
+
+POST flint_new_data_source_default_amazon_vpc_flow_v1__live_mview/_search
+{
+"track_total_hits": true,
+"aggs": {
+"2": {
+"terms": {
+"field": "aws.vpc.dstaddr",
+"order": {
+"_count": "desc"
+},
+"size": 10
+},
+"aggs": {
+"3": {
+"terms": {
+"field": "aws.vpc.srcaddr",
+"order": {
+"_count": "desc"
+},
+"size": 10
+}
+}
+}
+}
+},
+"size": 0,
+"stored_fields": [
+"*"
+],
+"script_fields": {},
+"docvalue_fields": [
+{
+"field": "@timestamp",
+"format": "date_time"
+},
+{
+"field": "aws.vpc.end",
+"format": "date_time"
+},
+{
+"field": "aws.vpc.start",
+"format": "date_time"
+},
+{
+"field": "observedTimestamp",
+"format": "date_time"
+},
+{
+"field": "observerTime",
+"format": "date_time"
+}
+],
+"_source": {
+"excludes": []
+}
+}
