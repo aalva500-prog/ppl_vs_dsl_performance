@@ -33,58 +33,32 @@ SOURCE = flint_new_data_source_default_aws_waf__mview | STATS count() as Count b
 
 POST flint_new_data_source_default_aws_waf__mview/_search
 {
-"track_total_hits": true,
-"aggs": {
-"2": {
-"date_histogram": {
-"field": "@timestamp",
-"fixed_interval": "30d",
-"time_zone": "America/Los_Angeles",
-"min_doc_count": 1
-},
-"aggs": {
-"3": {
-"terms": {
-"field": "aws.waf.action",
-"order": {
-"_count": "desc"
-},
-"size": 5
-}
-}
-}
-}
-},
-"size": 0,
-"stored_fields": [
-"*"
-],
-"script_fields": {},
-"docvalue_fields": [
-{
-"field": "@timestamp",
-"format": "date_time"
-},
-{
-"field": "timestamp",
-"format": "date_time"
-}
-],
-"_source": {
-"excludes": []
-},
-"query": {
-"bool": {
-"must": [],
-"filter": [
-{
-"match_all": {}
-}
-],
-"should": [],
-"must_not": []
-}
-}
+  "track_total_hits": true,
+  "aggs": {
+    "multi_field_agg": {
+      "composite": {
+        "size": 5,
+        "sources": [
+          {
+            "time_bucket": {
+              "date_histogram": {
+                "field": "@timestamp",
+                "fixed_interval": "30d"
+              }
+            }
+          },
+          {
+            "action": {
+              "terms": {
+                "field": "aws.waf.action"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "size": 0
 }
 
 Query #3:
@@ -319,18 +293,15 @@ POST flint_new_data_source_default_aws_waf__mview/_search
 },
 "query": {
 "bool": {
-"must": [
-{
-"query_string": {
-"query": "aws.waf.action:BLOCK",
-"analyze_wildcard": true,
-"time_zone": "America/Los_Angeles"
-}
-}
-],
+"must": [],
 "filter": [
 {
 "match_all": {}
+},
+{
+"term": {
+"aws.waf.action": "BLOCK"
+}
 }
 ],
 "should": [],

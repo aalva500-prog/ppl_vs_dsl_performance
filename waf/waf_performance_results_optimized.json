@@ -1,0 +1,38 @@
+[
+  {
+    "query_id": 7,
+    "ppl": {
+      "avg": 110.31,
+      "median": 109.23,
+      "std": 4.77,
+      "mad": 3.26,
+      "p90": 116.25,
+      "p95": 119.05,
+      "p99": 122.03,
+      "min": 101.52,
+      "max": 122.19,
+      "raw_max": 131.0,
+      "raw_avg": 110.72,
+      "outlier_count": 1,
+      "success_rate": 100.0
+    },
+    "dsl": {
+      "avg": 103.41,
+      "median": 102.03,
+      "std": 6.88,
+      "mad": 3.61,
+      "p90": 115.19,
+      "p95": 117.11,
+      "p99": 120.31,
+      "min": 92.88,
+      "max": 120.39,
+      "raw_max": 120.39,
+      "raw_avg": 103.41,
+      "outlier_count": 0,
+      "success_rate": 100.0
+    },
+    "statistically_significant": true,
+    "ppl_errors": [],
+    "dsl_errors": []
+  }
+]

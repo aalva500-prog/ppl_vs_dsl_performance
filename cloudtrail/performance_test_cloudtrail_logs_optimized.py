@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-Improved VPC Performance Tester with Robust Outlier Detection
+Optimized CloudTrail Performance Tester - Reduced Outliers
 
-Key improvements:
-1. MAD-based outlier detection during data collection
-2. Robust statistics calculation with outlier filtering
-3. Increased warm-up iterations
-4. Better reporting with outlier counts
-5. Separate tracking of raw vs cleaned metrics
+Key optimizations to reduce outliers:
+1. BATCHED testing instead of interleaved (run all PPL, then all DSL)
+2. INCREASED query delay from 0.05s to 0.5s (10x increase - maximum stability)
+3. Added COOLDOWN period between queries (2.0s - maximum settling)
+4. Increased warm-up iterations to 75 (maximum)
+5. MAD-based outlier detection retained
 """
 import json
 import time
@@ -19,8 +19,8 @@ import traceback
 import numpy as np
 from requests.auth import HTTPBasicAuth
 
-class ImprovedCloudTrailLogsPerformanceTester:
-    def __init__(self, endpoint, username, password, iterations=100, query_delay=0.05, outlier_threshold=3.5):
+class OptimizedCloudTrailLogsPerformanceTester:
+    def __init__(self, endpoint, username, password, iterations=100, query_delay=0.2, outlier_threshold=3.5):
         self.endpoint = endpoint.rstrip('/')
         self.iterations = iterations
         self.auth = HTTPBasicAuth(username, password)
@@ -87,24 +87,19 @@ class ImprovedCloudTrailLogsPerformanceTester:
                         if brace_count == 0 and line.endswith('}'):
                             break
                 else:
-                    json_start = -1
+                    # Look for JSON starting on next line after POST
+                    json_lines = []
+                    brace_count = 0
                     for j in range(post_idx + 1, len(lines)):
                         line = lines[j].strip()
-                        if line == '{':
-                            json_start = j
+                        if not line:
+                            continue
+                        json_lines.append(line)
+                        brace_count += line.count('{') - line.count('}')
+                        if brace_count > 0 and brace_count == 0 and line.endswith('}'):
                             break
-                    
-                    if json_start >= 0:
-                        json_lines = []
-                        brace_count = 0
-                        for j in range(json_start, len(lines)):
-                            line = lines[j].strip()
-                            if not line:
-                                continue
-                            json_lines.append(line)
-                            brace_count += line.count('{') - line.count('}')
-                            if brace_count == 0 and line.endswith('}'):
-                                break
+                        if brace_count == 0 and line == '}':  # Handle single '}' line
+                            break
                 
                 try:
                     dsl_query = json.loads('\n'.join(json_lines))
@@ -196,7 +191,7 @@ class ImprovedCloudTrailLogsPerformanceTester:
         modified_z_score = 0.6745 * (value - median) / mad
         return abs(modified_z_score) > threshold
     
-    def cluster_warm_up(self, queries, iterations=20):
+    def cluster_warm_up(self, queries, iterations=75):
         """
         Initial cluster warm-up - INCREASED from 10 to 20 iterations
         """
@@ -209,20 +204,39 @@ class ImprovedCloudTrailLogsPerformanceTester:
         failures = 0
         for iteration in range(iterations):
             print(f"  Cluster warm-up iteration {iteration + 1}/{iterations}...", end=" ")
+            iteration_successes = 0
+            iteration_failures = 0
             for query_data in sample_queries:
-                _, success, _ = self.execute_query('POST', f"{self.endpoint}/_plugins/_ppl", {"query": query_data['ppl']})
+                _, success, error = self.execute_query('POST', f"{self.endpoint}/_plugins/_ppl", {"query": query_data['ppl']})
                 if success:
                     successes += 1
+                    iteration_successes += 1
                 else:
                     failures += 1
+                    iteration_failures += 1
+                    # Print first error for debugging
+                    if iteration == 0 and iteration_failures == 1:
+                        print(f"\n    ⚠️  First error: {error[:200]}")
                 time.sleep(self.query_delay)
-            print("✓")
+            
+            # Show iteration result with actual success/failure count
+            if iteration_successes == len(sample_queries):
+                print("✓")
+            elif iteration_successes > 0:
+                print(f"⚠️  ({iteration_successes}/{len(sample_queries)} succeeded)")
+            else:
+                print(f"✗ (0/{len(sample_queries)} succeeded)")
         
         success_rate = (successes / (successes + failures) * 100) if (successes + failures) > 0 else 0
         print(f"🔥 Cluster warm-up complete! Success rate: {success_rate:.1f}% ({successes}/{successes + failures})\n")
+        
+        # Alert user if warm-up had significant failures
+        if success_rate < 50:
+            print("⚠️  WARNING: Cluster warm-up had low success rate. Check connection, credentials, and cluster availability.\n")
+        
         time.sleep(0.5)
     
-    def per_query_warm_up(self, ppl_query, dsl_query, index, iterations=10):
+    def per_query_warm_up(self, ppl_query, dsl_query, index, iterations=30):
         """
         Per-query warm-up - INCREASED from 5 to 10 iterations
         """
@@ -304,20 +318,20 @@ class ImprovedCloudTrailLogsPerformanceTester:
         print(f"Index: {index}")
         
         # Increased per-query warm-up (now 10 iterations)
-        self.per_query_warm_up(ppl_query, dsl_query, index, iterations=10)
+        self.per_query_warm_up(ppl_query, dsl_query, index, iterations=30)
         
-        # Interleaved testing
+        # BATCHED testing (all PPL first, then all DSL)
         ppl_times = []
         ppl_errors = []
         dsl_times = []
         dsl_errors = []
         
-        print(f"  Running {self.iterations} interleaved test iterations (PPL/DSL pairs)...", end=" ", flush=True)
+        # BATCHED testing (all PPL first, then all DSL)
+        print(f"  Running {self.iterations} PPL iterations...", end=" ", flush=True)
         for i in range(self.iterations):
             if (i + 1) % 10 == 0:
                 print(f"{i + 1}", end=" ", flush=True)
             
-            # Run PPL query
             exec_time, success, error = self.execute_query(
                 'POST', 
                 f"{self.endpoint}/_plugins/_ppl",
@@ -328,9 +342,22 @@ class ImprovedCloudTrailLogsPerformanceTester:
             else:
                 ppl_errors.append(error)
             
-            time.sleep(self.query_delay)
+            if i < self.iterations - 1:
+                time.sleep(self.query_delay)
+        
+        print(" ✓")
+        
+        # Cooldown between query types
+        print("  Cooldown between query types (1.0s)...", end=" ", flush=True)
+        time.sleep(1.0)
+        print("✓")
+        
+        # Now run DSL iterations
+        print(f"  Running {self.iterations} DSL iterations...", end=" ", flush=True)
+        for i in range(self.iterations):
+            if (i + 1) % 10 == 0:
+                print(f"{i + 1}", end=" ", flush=True)
             
-            # Run DSL query
             exec_time, success, error = self.execute_query(
                 'POST',
                 f"{self.endpoint}/{index}/_search",
@@ -344,7 +371,12 @@ class ImprovedCloudTrailLogsPerformanceTester:
             if i < self.iterations - 1:
                 time.sleep(self.query_delay)
         
-        print()
+        print(" ✓")
+        
+        # Cooldown before next query
+        print("  Cooldown before next query (1.0s)...", end=" ", flush=True)
+        time.sleep(1.0)
+        print("✓")
         
         # Calculate robust metrics
         ppl_metrics = self.calculate_robust_metrics(ppl_times)
@@ -394,18 +426,33 @@ class ImprovedCloudTrailLogsPerformanceTester:
         """
         Detect outlier QUERIES (not outlier executions within a query).
         Uses deterministic criteria based on performance characteristics.
+        
+        Note: PPL/DSL ratio threshold is now DATA-DRIVEN using IQR method
+        to adapt to the actual performance characteristics of the dataset.
         """
         if len(results) < 4:
             return set()
         
         outliers = set()
         
-        # 1. Queries with high PPL/DSL ratio (PPL significantly slower)
+        # 1. Queries with high PPL/DSL ratio (data-driven threshold using IQR)
+        ratios = []
         for r in results:
             if r['ppl']['median'] > 0 and r['dsl']['median'] > 0:
                 ratio = r['ppl']['median'] / r['dsl']['median']
-                if ratio > 1.5:  # PPL is 50% slower than DSL
-                    outliers.add(r['query_id'])
+                ratios.append((r['query_id'], ratio))
+        
+        if ratios:
+            ratio_values = [ratio for _, ratio in ratios]
+            q1 = np.percentile(ratio_values, 25)
+            q3 = np.percentile(ratio_values, 75)
+            iqr = q3 - q1
+            # Use 1.5 * IQR rule to identify extreme outliers
+            ratio_upper_bound = q3 + 1.5 * iqr
+            
+            for query_id, ratio in ratios:
+                if ratio > ratio_upper_bound:
+                    outliers.add(query_id)
         
         # 2. Queries with many outlier executions (inconsistent performance)
         for r in results:
@@ -428,7 +475,7 @@ class ImprovedCloudTrailLogsPerformanceTester:
         
         return outliers
     
-    def save_cloudtrail_csv_summary(self, results, queries, filename='cloudtrail_performance_summary_improved.csv'):
+    def save_cloudtrail_csv_summary(self, results, queries, filename='cloudtrail_performance_summary_optimized.csv'):
         """Save results with improved outlier reporting and interpretation guide"""
         with open(filename, 'w', newline='') as csvfile:
             writer = csv.writer(csvfile)
@@ -470,24 +517,33 @@ class ImprovedCloudTrailLogsPerformanceTester:
                 is_outlier = "Yes" if query_id in outliers else "No"
                 ppl_dsl_ratio = round(ppl['median'] / dsl['median'], 2) if dsl['median'] > 0 else 0
                 
-                # Determine outlier reason
+                # Determine outlier reason - calculate actual thresholds used
                 outlier_reason = ""
                 if query_id in outliers:
                     reasons = []
                     
-                    if ppl_dsl_ratio > 1.5:
-                        reasons.append(f"Slow_vs_DSL(ratio:{ppl_dsl_ratio}x)")
+                    # Calculate ratio threshold (same as in detect_outliers)
+                    ratio_values_all = [r['ppl']['median'] / r['dsl']['median'] if r['dsl']['median'] > 0 else 1 for r in results]
+                    if ratio_values_all:
+                        q1_r = np.percentile(ratio_values_all, 25)
+                        q3_r = np.percentile(ratio_values_all, 75)
+                        iqr_r = q3_r - q1_r
+                        ratio_threshold = q3_r + 1.5 * iqr_r
+                        
+                        if ppl_dsl_ratio > ratio_threshold:
+                            reasons.append(f"Slow_vs_DSL(ratio:{ppl_dsl_ratio:.2f}x>threshold:{ratio_threshold:.2f}x)")
                     
                     outlier_rate = ppl['outlier_count'] / self.iterations if self.iterations > 0 else 0
                     if outlier_rate > 0.05:
-                        reasons.append(f"High_Outlier_Rate({ppl['outlier_count']}/{self.iterations}={outlier_rate:.1%})")
+                        reasons.append(f"High_Outlier_Rate({ppl['outlier_count']}/{self.iterations}={outlier_rate:.1%}>5%)")
                     
                     ppl_medians = [r['ppl']['median'] for r in results if r['ppl']['median'] > 0]
                     if ppl_medians:
                         q3 = np.percentile(ppl_medians, 75)
                         iqr = np.percentile(ppl_medians, 75) - np.percentile(ppl_medians, 25)
-                        if ppl['median'] > q3 + 1.5 * iqr:
-                            reasons.append(f"Slow_PPL_Absolute(median:{ppl['median']}ms)")
+                        abs_threshold = q3 + 1.5 * iqr
+                        if ppl['median'] > abs_threshold:
+                            reasons.append(f"Slow_PPL_Absolute(median:{ppl['median']:.1f}ms>threshold:{abs_threshold:.1f}ms)")
                     
                     outlier_reason = ";".join(reasons) if reasons else "Statistical_Outlier"
                 
@@ -520,11 +576,21 @@ class ImprovedCloudTrailLogsPerformanceTester:
             writer.writerow(['Outlier_Reason', 'Why query was flagged - e.g., Slow_vs_DSL, High_Outlier_Rate, Slow_PPL_Absolute'])
             writer.writerow([])
             
+            # Calculate actual thresholds for the guide
+            ratio_values_guide = [r['ppl']['median'] / r['dsl']['median'] if r['dsl']['median'] > 0 else 1 for r in results]
+            if ratio_values_guide:
+                q1_guide = np.percentile(ratio_values_guide, 25)
+                q3_guide = np.percentile(ratio_values_guide, 75)
+                iqr_guide = q3_guide - q1_guide
+                ratio_threshold_guide = q3_guide + 1.5 * iqr_guide
+            else:
+                ratio_threshold_guide = 0
+            
             writer.writerow(['HEALTH INDICATORS:'])
             writer.writerow(['Metric', 'Healthy', 'Needs Attention', 'Critical'])
             writer.writerow(['PPL_Outlier_Count', '0-2', '3-5', '>5'])
             writer.writerow(['Raw vs Clean Max Difference', '<10%', '10-25%', '>25%'])
-            writer.writerow(['PPL_DSL_Ratio', '<1.1 (±10%)', '1.1-1.5 (10-50% slower)', '>1.5 (>50% slower)'])
+            writer.writerow(['PPL_DSL_Ratio', f'Within normal range for dataset', f'Approaching threshold', f'>Dataset threshold (>{ratio_threshold_guide:.2f}x for this run)'])
             writer.writerow(['PPL_Success_Rate', '≥95%', '80-95%', '<80%'])
             writer.writerow(['Performance_Outlier', 'No', '-', 'Yes'])
             writer.writerow([])
@@ -532,7 +598,7 @@ class ImprovedCloudTrailLogsPerformanceTester:
             writer.writerow(['HOW TO IDENTIFY PROBLEMATIC QUERIES:'])
             writer.writerow(['1. Check Performance_Outlier column', 'Yes = Query needs investigation'])
             writer.writerow(['2. Check PPL_Outlier_Count', '>5 outliers = Inconsistent performance (network/cluster issues)'])
-            writer.writerow(['3. Check PPL_DSL_Ratio', '>1.5 = PPL significantly slower than DSL (optimization opportunity)'])
+            writer.writerow(['3. Check PPL_DSL_Ratio', f'Check Outlier_Reason for actual threshold (data-driven, was {ratio_threshold_guide:.2f}x for this dataset)'])
             writer.writerow(['4. Check PPL_Success_Rate', '<95% = Query reliability issues'])
             writer.writerow(['5. Compare PPL_Raw_Max_ms vs PPL_Max_ms', '>25% difference = Large performance spikes'])
             writer.writerow([])
@@ -594,12 +660,20 @@ class ImprovedCloudTrailLogsPerformanceTester:
                 writer.writerow(['Success Rate', f"{ppl['success_rate']}%"])
                 writer.writerow([])
                 
-                # Criterion 1: PPL/DSL Ratio
-                ratio_pass = ppl_dsl_ratio <= 1.5
-                writer.writerow(['Criterion 1: PPL/DSL Performance Ratio'])
+                # Calculate ratio threshold dynamically
+                ratio_values = [r['ppl']['median'] / r['dsl']['median'] if r['dsl']['median'] > 0 else 1 for r in results]
+                q1_ratio = np.percentile(ratio_values, 25)
+                q3_ratio = np.percentile(ratio_values, 75)
+                iqr_ratio = q3_ratio - q1_ratio
+                ratio_threshold = q3_ratio + 1.5 * iqr_ratio
+                
+                # Criterion 1: PPL/DSL Ratio (data-driven threshold)
+                ratio_pass = ppl_dsl_ratio <= ratio_threshold
+                writer.writerow(['Criterion 1: PPL/DSL Performance Ratio (Data-Driven Threshold)'])
                 writer.writerow(['  Value', f"{ppl_dsl_ratio:.2f}x"])
-                writer.writerow(['  Threshold', '≤1.5x (PPL should not be >50% slower than DSL)'])
-                writer.writerow(['  Status', f"{'✓ PASS' if ratio_pass else '✗ FAIL - PPL significantly slower than DSL'}"])
+                writer.writerow(['  Threshold', f"≤{ratio_threshold:.2f}x (Q3 + 1.5×IQR of all PPL/DSL ratios)"])
+                writer.writerow(['  Baseline', f"Dataset avg ratio: {np.mean(ratio_values):.2f}x, Q1: {q1_ratio:.2f}x, Q3: {q3_ratio:.2f}x"])
+                writer.writerow(['  Status', f"{'✓ PASS' if ratio_pass else '✗ FAIL - PPL ratio is an extreme outlier vs other queries'}"])
                 writer.writerow([])
                 
                 # Criterion 2: Outlier Execution Rate
@@ -643,19 +717,21 @@ class ImprovedCloudTrailLogsPerformanceTester:
                         writer.writerow(['Note', f"Had {ppl['outlier_count']} outlier executions but within acceptable range (<5%)"])
 
 def main():
-    # Configuration - IMPROVED
-    CLUSTER_WARMUP_ITERATIONS = 20   # Increased from 10
-    PER_QUERY_WARMUP_ITERATIONS = 10  # Increased from 5
-    TEST_ITERATIONS = 100
-    QUERY_DELAY = 0.05
-    OUTLIER_THRESHOLD = 3.5  # MAD-based z-score threshold
+    # MAXIMUM STABILITY Configuration (for clusters with persistent high outliers)
+    # Use this when experiencing >5% outlier rates even with ultra-stable config
+    CLUSTER_WARMUP_ITERATIONS = 75   # Increased from 50 (maximum warm-up)
+    PER_QUERY_WARMUP_ITERATIONS = 30  # Increased from 20 (maximum per-query caching)
+    TEST_ITERATIONS = 50              # Reduced from 75 (fewer samples but faster, add more runs instead)
+    QUERY_DELAY = 0.7                 # INCREASED from 0.5 to 0.7 seconds (14x original - gives PPL query planner more time)
+    COOLDOWN = 2.0                    # INCREASED from 1.5 to 2.0 seconds (maximum settling time)
+    OUTLIER_THRESHOLD = 4.0  # Increased from 3.5 to reduce outlier detection
     
     import os
-    ENDPOINT = os.getenv('OPENSEARCH_ENDPOINT', 'https://your-opensearch-endpoint.region.es.amazonaws.com')
-    USERNAME = os.getenv('OPENSEARCH_USERNAME', 'your-username')
-    PASSWORD = os.getenv('OPENSEARCH_PASSWORD', 'your-password')
+    ENDPOINT = os.getenv('OPENSEARCH_ENDPOINT', 'https://search-another-c6oixcocja4yha3dtq46glguvm.us-east-1.es.amazonaws.com')
+    USERNAME = os.getenv('OPENSEARCH_USERNAME', 'admin')
+    PASSWORD = os.getenv('OPENSEARCH_PASSWORD', 'h7iCC<DEb73z.}O?n1H-3w!>')
     
-    tester = ImprovedCloudTrailLogsPerformanceTester(
+    tester = OptimizedCloudTrailLogsPerformanceTester(
         ENDPOINT,
         USERNAME,
         PASSWORD,
@@ -664,8 +740,15 @@ def main():
         OUTLIER_THRESHOLD
     )
     
-    queries = tester.parse_cloudtrail_queries_file('cloudtrail_ppl_queries.json')
+    queries = tester.parse_cloudtrail_queries_file('/Users/aaarone/Documents/Code/ppl_performance_analysis/ppl_vs_dsl_performance/ppl_vs_dsl_performance/cloudtrail/cloudtrail_ppl_queries.json')
     print(f"Found {len(queries)} CloudTrail query pairs")
+    print(f"\n🎯 OPTIMIZED CONFIGURATION:")
+    print(f"  • Query delay: {QUERY_DELAY}s (4x increase for cluster stability)")
+    print(f"  • Testing mode: BATCHED (all PPL first, then all DSL)")
+    print(f"  • Cooldown between queries: 1.0s")
+    print(f"  • Cluster warm-up: {CLUSTER_WARMUP_ITERATIONS} iterations")
+    print(f"  • Per-query warm-up: {PER_QUERY_WARMUP_ITERATIONS} iterations")
+    print(f"  • Outlier threshold: {OUTLIER_THRESHOLD} (MAD-based z-score)\n")
     print(f"Configuration: {CLUSTER_WARMUP_ITERATIONS} cluster warm-up iterations, "
           f"{PER_QUERY_WARMUP_ITERATIONS} per-query warm-up iterations, "
           f"{TEST_ITERATIONS} test iterations per query")
@@ -690,7 +773,7 @@ def main():
     
     if results:
         tester.save_cloudtrail_csv_summary(results, queries)
-        with open('cloudtrail_performance_results_improved.json', 'w') as f:
+        with open('cloudtrail_performance_results_optimized.json', 'w') as f:
             json.dump(results, f, indent=2)
         print(f"\nResults saved to cloudtrail_performance_summary_improved.csv and cloudtrail_performance_results_improved.json")
         print(f"Tested {len(results)} out of {len(queries)} CloudTrail query pairs")

@@ -464,74 +464,40 @@ SOURCE = flint_new_data_source_default_aws_cloudtrail__001 | STATS count() as Co
 
 POST flint_new_data_source_default_aws_cloudtrail__001/_search
 {
-"track_total_hits": true,
-"aggs": {
-"2": {
-"terms": {
-"field": "aws.cloudtrail.userIdentity.sessionContext.sessionIssuer.userName.keyword",
-"order": {
-"_count": "desc"
-},
-"size": 10
-},
-"aggs": {
-"4": {
-"terms": {
-"field": "aws.cloudtrail.userIdentity.accountId.keyword",
-"order": {
-"_count": "desc"
-},
-"size": 10
-},
-"aggs": {
-"5": {
-"terms": {
-"field": "aws.cloudtrail.userIdentity.sessionContext.sessionIssuer.type.keyword",
-"order": {
-"_count": "desc"
-},
-"size": 10
-}
-}
-}
-}
-}
-}
-},
-"size": 0,
-"stored_fields": [
-"*"
-],
-"script_fields": {},
-"docvalue_fields": [
-{
-"field": "@timestamp",
-"format": "date_time"
-},
-{
-"field": "aws.cloudtrail.eventTime",
-"format": "date_time"
-},
-{
-"field": "aws.cloudtrail.requestParameter.endTime",
-"format": "date_time"
-},
-{
-"field": "aws.cloudtrail.requestParameter.startTime",
-"format": "date_time"
-},
-{
-"field": "aws.cloudtrail.responseElements.lastModified",
-"format": "date_time"
-},
-{
-"field": "aws.cloudtrail.userIdentity.sessionContext.attributes.creationDate",
-"format": "date_time"
-}
-],
-"_source": {
-"excludes": []
-}
+  "size": 0,
+  "aggs": {
+    "multi_field_agg": {
+      "composite": {
+        "size": 10,
+        "sources": [
+          {
+            "userName": {
+              "terms": {
+                "field": "aws.cloudtrail.userIdentity.sessionContext.sessionIssuer.userName.keyword",
+                "missing_bucket": true
+              }
+            }
+          },
+          {
+            "accountId": {
+              "terms": {
+                "field": "aws.cloudtrail.userIdentity.accountId.keyword",
+                "missing_bucket": true
+              }
+            }
+          },
+          {
+            "type": {
+              "terms": {
+                "field": "aws.cloudtrail.userIdentity.sessionContext.sessionIssuer.type.keyword",
+                "missing_bucket": true
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
 }
 
 Query #10:
@@ -595,7 +561,7 @@ POST flint_new_data_source_default_aws_cloudtrail__001/_search
 "fields": [
 "aws.cloudtrail.eventSource"
 ],
-"query": "s\\3*"
+"query": "s3*"
 }
 }
 ],
@@ -704,7 +670,7 @@ POST flint_new_data_source_default_aws_cloudtrail__001/_search
 "fields": [
 "aws.cloudtrail.eventSource"
 ],
-"query": "s\\3*"
+"query": "s3*"
 }
 }
 ],
@@ -733,7 +699,7 @@ POST flint_new_data_source_default_aws_cloudtrail__001/_search
 "order": {
 "_count": "desc"
 },
-"size": 10
+"size": 100
 },
 "aggs": {
 "3": {
@@ -742,7 +708,7 @@ POST flint_new_data_source_default_aws_cloudtrail__001/_search
 "order": {
 "_count": "desc"
 },
-"size": 10
+"size": 100
 }
 }
 }
@@ -797,7 +763,7 @@ POST flint_new_data_source_default_aws_cloudtrail__001/_search
 "fields": [
 "aws.cloudtrail.eventSource"
 ],
-"query": "s\\3*"
+"query": "s3*"
 }
 }
 ],
@@ -837,173 +803,32 @@ SOURCE = flint_new_data_source_default_aws_cloudtrail__001 | where `aws.cloudtra
 
 POST flint_new_data_source_default_aws_cloudtrail__001/_search
 {
-"track_total_hits": true,
-"aggs": {
-"2": {
-"terms": {
-"field": "aws.cloudtrail.eventName",
-"order": {
-"_count": "desc"
-},
-"size": 5
-}
-}
-},
-"size": 0,
-"stored_fields": [
-"*"
-],
-"script_fields": {},
-"docvalue_fields": [
-{
-"field": "@timestamp",
-"format": "date_time"
-},
-{
-"field": "aws.cloudtrail.eventTime",
-"format": "date_time"
-},
-{
-"field": "aws.cloudtrail.requestParameter.endTime",
-"format": "date_time"
-},
-{
-"field": "aws.cloudtrail.requestParameter.startTime",
-"format": "date_time"
-},
-{
-"field": "aws.cloudtrail.responseElements.lastModified",
-"format": "date_time"
-},
-{
-"field": "aws.cloudtrail.userIdentity.sessionContext.attributes.creationDate",
-"format": "date_time"
-}
-],
-"_source": {
-"excludes": []
-},
-"query": {
-"bool": {
-"must": [],
-"filter": [
-{
-"match_all": {}
-},
-{
-"bool": {
-"filter": [
-{
-"bool": {
-"should": [
-{
-"query_string": {
-"fields": [
-"aws.cloudtrail.eventSource"
-],
-"query": "ec\\2*"
-}
-}
-],
-"minimum_should_match": 1
-}
-},
-{
-"bool": {
-"should": [
-{
-"bool": {
-"should": [
-{
-"match": {
-"aws.cloudtrail.eventName": "RunInstances"
-}
-}
-],
-"minimum_should_match": 1
-}
-},
-{
-"bool": {
-"should": [
-{
-"bool": {
-"should": [
-{
-"match": {
-"aws.cloudtrail.eventName": "TerminateInstances"
-}
-}
-],
-"minimum_should_match": 1
-}
-},
-{
-"bool": {
-"should": [
-{
-"bool": {
-"should": [
-{
-"match": {
-"aws.cloudtrail.eventName": "RunInstances"
-}
-}
-],
-"minimum_should_match": 1
-}
-},
-{
-"bool": {
-"should": [
-{
-"match": {
-"aws.cloudtrail.eventName": "StopInstances"
-}
-}
-],
-"minimum_should_match": 1
-}
-}
-],
-"minimum_should_match": 1
-}
-}
-],
-"minimum_should_match": 1
-}
-}
-],
-"minimum_should_match": 1
-}
-}
-]
-}
-},
-{
-"bool": {
-"must_not": {
-"bool": {
-"should": [
-{
-"query_string": {
-"fields": [
-"aws.cloudtrail.eventName"
-],
-"query": "Get*  Describe*  List* Head*"
-}
-}
-],
-"minimum_should_match": 1
-}
-}
-}
-}
-],
-"should": [],
-"must_not": []
-}
-}
+  "size": 0,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "wildcard": {
+            "aws.cloudtrail.eventSource": "ec2*"
+          }
+        },
+        {
+          "terms": {
+            "aws.cloudtrail.eventName": ["RunInstances", "TerminateInstances", "StopInstances"]
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "eventName": {
+      "terms": {
+        "field": "aws.cloudtrail.eventName",
+        "size": 5,
+        "order": { "_count": "desc" }
+      }
+    }
+  }
 }
 
 Query #14:
@@ -1074,7 +899,7 @@ POST flint_new_data_source_default_aws_cloudtrail__001/_search
 "fields": [
 "aws.cloudtrail.eventSource"
 ],
-"query": "ec\\2*"
+"query": "ec2*"
 }
 }
 ],
@@ -1175,7 +1000,7 @@ POST flint_new_data_source_default_aws_cloudtrail__001/_search
 "fields": [
 "aws.cloudtrail.eventSource"
 ],
-"query": "ec\\2*"
+"query": "ec2*"
 }
 }
 ],
@@ -1208,55 +1033,3 @@ POST flint_new_data_source_default_aws_cloudtrail__001/_search
 }
 }
 
-Query #16:
----------
-	
-SOURCE = flint_new_data_source_default_amazon_networkfirewall__mview | stats sum(`aws.networkfirewall.event.netflow.pkts`) as packet_count by span(`aws.networkfirewall.event.timestamp`, 1d) as timestamp_span, `aws.networkfirewall.event.src_ip` | rename `aws.networkfirewall.event.src_ip` as `Source IP` | sort - packet_count | head 10	
-
-POST flint_new_data_source_default_amazon_networkfirewall__mview/_search
-{
-"track_total_hits": true,
-"size": 0,
-"aggs": {
-"source_ips": {
-"terms": {
-"field": "aws.networkfirewall.event.src_ip",
-"size": 10,
-"order": {
-"total_packets": "desc"
-}
-},
-"aggs": {
-"total_packets": {
-"sum": {
-"field": "aws.networkfirewall.event.netflow.pkts"
-}
-},
-"time_series": {
-"date_histogram": {
-"field": "aws.networkfirewall.event.timestamp",
-"fixed_interval": "24h"
-},
-"aggs": {
-"packet_count": {
-"sum": {
-"field": "aws.networkfirewall.event.netflow.pkts"
-}
-}
-}
-}
-}
-}
-},
-"query": {
-"bool": {
-"filter": [
-{
-"match_all": {}
-}
-],
-"should": [],
-"must_not": []
-}
-}
-}

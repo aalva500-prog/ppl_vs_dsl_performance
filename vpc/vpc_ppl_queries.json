@@ -746,7 +746,7 @@ POST flint_new_data_source_default_amazon_vpc_flow_v1__live_mview/_search
 "order": {
 "_count": "desc"
 },
-"size": 10
+"size": 100
 },
 "aggs": {
 "3": {
@@ -755,7 +755,7 @@ POST flint_new_data_source_default_amazon_vpc_flow_v1__live_mview/_search
 "order": {
 "_count": "desc"
 },
-"size": 10
+"size": 100
 }
 }
 }
